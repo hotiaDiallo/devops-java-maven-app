@@ -8,7 +8,7 @@ pipeline {
             steps {
                 script {
                     echo "building jar..."
-                    sh 'maven package'
+                    sh 'mvn package'
                 }
             }
         }
@@ -21,7 +21,7 @@ pipeline {
                         usernameVariable: 'USERNAME', 
                         passwordVariable: 'PASSWORD'
                     )]){
-                        sh 'docker build -t selftaughdevops/devops-java-maven-app:1.0'
+                        sh 'docker build -t selftaughdevops/devops-java-maven-app:1.0 .'
                         sh "echo $PASSWORD | docker login -u $USERNAME --password-stdin"
                         sh 'docker push selftaughdevops/devops-java-maven-app:1.0'
                     }
