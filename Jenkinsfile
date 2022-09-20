@@ -9,7 +9,7 @@ pipeline {
             }
         }
         stage("build image") {
-            stepss {
+            steps {
                 script {
                     echo "building image"
                 }
