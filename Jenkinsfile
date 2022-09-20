@@ -3,7 +3,25 @@ pipeline {
     tools{
         maven 'maven'
     }
+    parameters{
+        choice(name:'VERSION', choices:['1.0.0', '1.1.0', '1.2.0'], description: '')
+        booleanParam(name:'executeTests', defaultValue: true, description:'')
+    }
     stages {
+
+        stage("tests") {
+            when {
+                expression {
+                    params.executeTests
+                }
+            }
+            steps {
+                script {
+                    echo "Launching tests..."
+                }
+            }
+        }
+
         stage("build jar") {
             steps {
                 script {
@@ -31,7 +49,8 @@ pipeline {
         stage("deploy") {
             steps {
                 script {
-                    echo "deploying"
+                    env.ENV = input message: "Select the environment to deploy to", ok: "Done", parameters: [choice(name: 'ONE', choices: ['dev', 'staging', 'prod'], description: '')]
+                    echo "Deploying to ${ENV}"
                 }
             }
         }
