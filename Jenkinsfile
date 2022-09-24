@@ -1,24 +1,25 @@
-#!/usr/bin/env groovy
+/* This is when shared library is set for all projects*/
+//@Library('jenkins-shared-library')
+
+
+/* This is when shared library is set only for this project*/
+library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
+        [$class: 'GitSCMSource',
+         remote: 'https://github.com/hotiaDiallo/jenkins-shared-library.git',
+         credentialsId: 'github-credentials'
+        ]
+)
 
 pipeline {
     agent any
     tools {
         maven 'maven'
     }
+    environment{
+        IMAGE_NAME = 'selftaughdevops/java-maven-app:1.0-SNAPSHOT'
+    }
     stages {
-        stage('increment version') {
-            steps {
-                script {
-                    echo 'incrementing app version...'
-                    sh 'mvn build-helper:parse-version versions:set \
-                        -DnewVersion=\\\${parsedVersion.majorVersion}.\\\${parsedVersion.minorVersion}.\\\${parsedVersion.nextIncrementalVersion} \
-                        versions:commit'
-                    def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
-                    def version = matcher[0][1]
-                    env.IMAGE_NAME = "$version-$BUILD_NUMBER"
-                }
-            }
-        }
+        
         stage('build app') {
             steps {
                 script {
@@ -27,40 +28,22 @@ pipeline {
                 }
             }
         }
-        stage('build image') {
+        stage("build and push image") {
             steps {
                 script {
-                    echo "building the docker image..."
-                    withCredentials([usernamePassword(
-                            credentialsId: 'docker-hub-repo',
-                            passwordVariable: 'PASSWORD',
-                            usernameVariable: 'USERNAME'
-                    )]) {
-                        sh "docker build -t selftaughdevops/devops-java-maven-app:${IMAGE_NAME} ."
-                        sh "echo $PASSWORD | docker login -u $USERNAME --password-stdin"
-                        sh "docker push selftaughdevops/devops-java-maven-app:${IMAGE_NAME}"
-                    }
+                    dockerBuildImage(env.IMAGE_NAME)
+                    dockerLogin()
+                    dockerPush(env.IMAGE_NAME)
                 }
             }
         }
-        stage('deploy') {
+        stage("deploy") {
             steps {
                 script {
-                    echo 'deploying docker image to EC2...'
-                }
-            }
-        }
-        stage('commit version update') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(
-                            credentialsId: 'github-credentials',
-                            passwordVariable: 'PASSWORD',
-                            usernameVariable: 'USERNAME'
-                    )]) {
-                        // git config here for the first time run
-                        sh 'git config --global user.email "idiallo@example.com"'
-                        sh 'git config --global user.name "idiallo"'
+                    echo "Deploying application to the EC2 server..."
+                    def dockerCmd = "docker run -d -p 8080:8080 ${IMAGE_NAME}"
+                    sshagent(['ec2-server-key']){
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@54.84.205.104 ${dockerCmd}"
                     }
                 }
             }
