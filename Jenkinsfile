@@ -15,9 +15,6 @@ pipeline {
     tools {
         maven 'maven'
     }
-    environment{
-        IMAGE_NAME = 'selftaughdevops/java-maven-app:1.0-SNAPSHOT'
-    }
     stages {
 
         stage('increment version') {
