@@ -1,14 +1,14 @@
 /* This is when shared library is set for all projects*/
-//@Library('jenkins-shared-library')
+@Library('jenkins-shared-library')
 
 
 /* This is when shared library is set only for this project*/
-library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
+/*library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
         [$class: 'GitSCMSource',
          remote: 'https://github.com/hotiaDiallo/jenkins-shared-library.git',
          credentialsId: 'github-credentials'
         ]
-)
+)*/
 
 pipeline {
     agent any
@@ -43,7 +43,7 @@ pipeline {
                     echo "Deploying application to the EC2 server..."
                     def dockerCmd = "docker run -d -p 8080:8080 ${IMAGE_NAME}"
                     sshagent(['ec2-server-key']){
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@54.84.205.104 ${dockerCmd}"
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@44.211.190.125 ${dockerCmd}"
                     }
                 }
             }
