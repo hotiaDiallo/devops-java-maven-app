@@ -15,6 +15,9 @@ pipeline {
     tools {
         maven 'maven'
     }
+    environment{
+        IMAGE_NAME = 'selftaughdevops/java-maven-app'
+    }
     stages {
 
         stage('increment version') {
@@ -26,7 +29,7 @@ pipeline {
                         versions:commit'
                     def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
                     def version = matcher[0][1]
-                    env.IMAGE_NAME = "$version-$BUILD_NUMBER"
+                    env.IMAGE = "{IMAGE_NAME}:$version-$BUILD_NUMBER"
                 }
             }
         }
@@ -42,9 +45,9 @@ pipeline {
         stage("build and push image") {
             steps {
                 script {
-                    dockerBuildImage(env.IMAGE_NAME)
+                    dockerBuildImage(env.IMAGE)
                     dockerLogin()
-                    dockerPush(env.IMAGE_NAME)
+                    dockerPush(env.IMAGE)
                 }
             }
         }
@@ -53,7 +56,7 @@ pipeline {
                 script {
                     echo "Deploying application to the EC2 server..."
                     //def dockerCmd = "docker run -d -p 8080:8080 ${IMAGE_NAME}"
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE}"
                     def ec2InstanceServer = 'ec2-user@44.211.190.125'
                     sshagent(['ec2-server-key']){
                         sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2InstanceServer}:/home/ec2-user"
