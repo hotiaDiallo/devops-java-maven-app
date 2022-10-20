@@ -6,4 +6,8 @@
 
 <br>
 
+## [Create EKS cluster and deploy nginx](https://github.com/hotiaDiallo/devops-java-maven-app/tree/eks-cluster-with-node-group)
+
+<br>
+
 ## Next step : coming soon
