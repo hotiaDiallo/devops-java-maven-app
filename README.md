@@ -45,6 +45,7 @@ This command will create a config file wich have all the required configuration 
 
 ### 4- Create a Node Group and attach it to EKS cluster to have all master and worker nodes running 
 <br>
+
 ![Image](/images/master-worker.png)
 
 <br>
