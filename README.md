@@ -132,6 +132,8 @@ docker-compose --version
 
 ## - Deploy to EKS
 
+### [See how to create EKS cluster](https://github.com/hotiaDiallo/devops-java-maven-app/tree/eks-cluster-with-node-group)
+
 Steps to deploy Image from Dockerhub to EKS
 
 - Install [kubectl](https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/) inside Jenkins container 
