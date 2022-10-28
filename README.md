@@ -1,5 +1,7 @@
 # Build Automation & CI/CD with Jenkins and AWS
 
+![Image](/images/Jenkins-pipeline.drawio.png)
+
 In this project we are going to see how to do a complete CI/CD pipeline on Jenkins
 
 ## Quick start : create jenkins as docker container
@@ -21,6 +23,8 @@ Since we will run docker in the Jenkins (which is a docker container), we will m
 - Commit the update version 
 
 ### Update application version
+
+![Image](/images/step1.drawio.png)
 
 Since it's a java project, we are going to use a [maven plugin](https://www.mojohaus.org/build-helper-maven-plugin/parse-version-mojo.html) update the version every time we run the pipeline. 
 
@@ -47,6 +51,9 @@ So we have to install maven on Jenkins.
 <br>
 
 ### Build the application
+
+![Image](/images/step2.drawio.png)
+
 ```
 stage('build app') {
     steps {
@@ -60,6 +67,8 @@ stage('build app') {
 <br>
 
 ### Build docker image and push to dockerhub or private repository
+
+![Image](/images/step3.drawio.png)
 
 In this step, Jenkins is going to need to authenticate to docker hub to push the build image; 
 So it's we need to add credentials(`docker-hub-repo`) on jenkins before doing a `docker login`
@@ -87,6 +96,8 @@ stage('build image') {
 <br>
 
 ## Deploy to AWS : EC2 and EKS 
+
+![Image](/images/step4.drawio.png)
 
 In this project we only have one image to deploy, but if we have more than one, it's will not be easy de deploy without using a container orchestrator. 
 
@@ -164,6 +175,34 @@ stage('deploy to eks cluster...') {
 }
 ```
 <br>
+
+## - Commit updated version
+
+![Image](/images/step5.drawio.png)
+
+```
+stage('commit version update') {
+    steps {
+        script {
+            withCredentials([usernamePassword(
+                    credentialsId: 'github-credentials',
+                    passwordVariable: 'PASSWORD',
+                    usernameVariable: 'USERNAME'
+            )]) {
+                // git config here for the first time run
+                sh 'git config --global user.email "idiallo@example.com"'
+                sh 'git config --global user.name "idiallo"'
+
+                sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@github.com/hotiaDiallo/devops-java-maven-app.git"
+                sh 'git add .'
+                sh 'git commit -m "ci: version bump"'
+                sh 'git push origin HEAD:jenkins-jobs'
+            }
+        }
+    }
+}
+```
+    
 
 ---
 ## Jenkins Shared Library 
