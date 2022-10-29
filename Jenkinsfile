@@ -1,14 +1,14 @@
 /* This is when shared library is set for all projects*/
-//@Library('jenkins-shared-library')
+@Library('jenkins-shared-library')
 
 
 /* This is when shared library is set only for this project*/
-library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
+/* library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
         [$class: 'GitSCMSource',
          remote: 'https://github.com/hotiaDiallo/jenkins-shared-library.git',
          credentialsId: 'github-repo'
         ]
-)
+) */
 
 pipeline {
     agent any
