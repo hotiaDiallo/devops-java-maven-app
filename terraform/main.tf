@@ -3,6 +3,12 @@ terraform {
     aws = {
       source = "hashicorp/aws"
       version = "4.37.0"
+      backend "s3" {
+        bucket = "korner-app-bucket"
+        key = "my-app/state.tfstate"
+        region = "eu-west-3"
+      }
+      
     }
   }
 }
