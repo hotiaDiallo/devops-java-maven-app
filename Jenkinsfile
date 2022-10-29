@@ -6,7 +6,7 @@
 library identifier: 'jenkins-shared-library@main', retriever: modernSCM(
         [$class: 'GitSCMSource',
          remote: 'https://github.com/hotiaDiallo/jenkins-shared-library.git',
-         credentialsId: 'github-credentials'
+         credentialsId: 'github-repo'
         ]
 )
 
@@ -39,7 +39,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage("deploy") {
             steps {
                 script {
