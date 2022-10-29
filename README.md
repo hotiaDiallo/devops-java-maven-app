@@ -172,10 +172,6 @@ For that, we need to :
 
 ![Image](/images/deploy.png)
 
-- Logs for deploy 
-
-![Image](/images/docker-container.png)
-
 - ssh to EC2 instance and verify application is running 
 
 ![Image](/images/docker-container.png)
