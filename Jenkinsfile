@@ -46,18 +46,16 @@ pipeline {
                 AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
                 TF_VAR_env_prefix = 'test'
             }
-            steps{
-                script{
-                     echo 'Provisionning EC2 server...'
-                     dir('terraform'){
-                        sh 'terraform init'
-                        sh 'terraform apply --auto-approve'
-                        // get ec2 public ip value
+            steps {
+                script {
+                    dir('terraform') {
+                        sh "terraform init"
+                        sh "terraform apply --auto-approve"
                         EC2_PUBLIC_IP = sh(
-                            script: 'terraform output ec2_public_ip',
+                            script: "terraform output ec2_public_ip",
                             returnStdout: true
                         ).trim()
-                     }
+                    }
                 }
             }
         }
