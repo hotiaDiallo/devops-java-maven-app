@@ -63,7 +63,7 @@ pipeline {
         stage("deploy") {
             environment{
                 DOCKER_CREDS = credentials('docker-hub-repo')
-                // This gives us to env vars DOCKER_CREDS_USR and DOCKER_CREDS_PWD
+                // This gives us to env vars DOCKER_CREDS_USR and DOCKER_CREDS_PSW
             }
             steps {
                 script {
@@ -74,7 +74,7 @@ pipeline {
                     echo "${EC2_PUBLIC_IP}"
 
                     //def dockerCmd = "docker run -d -p 8080:8080 ${IMAGE_NAME}"
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PWD}"
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PSW}"
                     def ec2InstanceServer = "ec2-user@${EC2_PUBLIC_IP}"
                     sshagent(['ec2-server-key']){
                         sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2InstanceServer}:/home/ec2-user"
