@@ -1,4 +1,4 @@
-<div align="center">
+<div>
 <img width="60" src="https://raw.githubusercontent.com/gilbarbara/logos/master/logos/docker-icon.svg"/>
 <img width="60" src="https://raw.githubusercontent.com/gilbarbara/logos/master/logos/terraform-icon.svg"/>
 <img width="60" src="images/kubernetes.svg"/>
