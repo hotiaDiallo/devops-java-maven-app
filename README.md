@@ -26,7 +26,7 @@ Since we will run docker in the Jenkins (which is a docker container), we will m
     - Option 2 : create ssh key-pair from AWS Management console 
 - Add Terraform configuration to provision the server 
 
-checkout to this [project](https://github.com/hotiaDiallo/terraform-playground/tree/deploy-to-ec2) where I explain how to automate EC2 provisioning with Terraform
+checkout to this [project where I explain how to automate EC2 provisioning with Terraform](https://github.com/hotiaDiallo/terraform-playground/tree/deploy-to-ec2)
 
 We wiil create for this project : 
 
