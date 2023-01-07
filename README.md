@@ -14,6 +14,7 @@
 
 ## [Build Automation & CI/CD with Jenkins and AWS](https://github.com/hotiaDiallo/devops-java-maven-app/tree/jenkins-jobs)
 
+## [Build Automation & CI/CD with Jenkins and AWS EKS and ECR](https://github.com/hotiaDiallo/devops-java-maven-app/tree/pipeline-with-aws-eks-and-ecr)
 
 ## [Create EKS cluster and deploy nginx](https://github.com/hotiaDiallo/devops-java-maven-app/tree/eks-cluster-with-node-group)
 
