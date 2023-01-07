@@ -5,6 +5,11 @@ pipeline {
     tools {
         maven 'maven'
     }
+    environment {
+        ECR_REPO_URL = '761900873497.dkr.ecr.eu-west-3.amazonaws.com'
+        IMAGE_REPO = "${ECR_REPO_URL}/devops-java-maven-app"
+    }
+
     stages {
         stage('increment version') {
             steps {
@@ -16,6 +21,7 @@ pipeline {
                     def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
                     def version = matcher[0][1]
                     env.IMAGE_NAME = "$version-$BUILD_NUMBER"
+                    echo "############ ${IMAGE_REPO}"
                 }
             }
         }
@@ -27,7 +33,24 @@ pipeline {
                 }
             }
         }
+
+        // Build image and  push to ECR
         stage('build image') {
+            steps {
+                script {
+                    echo "building the docker image..."
+                    withCredentials([usernamePassword(credentialsId: 'ecr-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh "docker build -t ${IMAGE_REPO}:${IMAGE_NAME} ."
+                        sh "echo $PASS | docker login -u $USER --password-stdin ${ECR_REPO_URL}"
+                        sh "docker push ${IMAGE_REPO}:${IMAGE_NAME}"
+                    }
+                }
+            }
+        }
+
+
+        // Build image and  push to docker hub
+        /* stage('build image') {
             steps {
                 script {
                     echo "building the docker image..."
@@ -42,28 +65,13 @@ pipeline {
                     }
                 }
             }
-        }
-        // Deploy to EC2 using docker compose
-        /* stage("deploy") {
-            steps {
-                script {
-                    echo "Deploying application to the EC2 server..."
-                    //def dockerCmd = "docker run -d -p 8080:8080 ${IMAGE_NAME}"
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
-                    def ec2InstanceServer = 'ec2-user@44.211.190.125'
-                    sshagent(['ec2-server-key']){
-                        sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2InstanceServer}:/home/ec2-user"
-                        sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2InstanceServer}:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2InstanceServer} ${shellCmd}"
-                    }
-                }
-            }
         } */
+
         stage('deploy to eks cluster...') {
             environment {
                 AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
                 AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
-                APP_NAME = 'java-maven-app'
+                APP_NAME = 'devops-java-maven-app'
             }
             steps {
                 script {
@@ -73,6 +81,7 @@ pipeline {
                 }
             }
         }
+
         stage('commit version update') {
             steps {
                 script {

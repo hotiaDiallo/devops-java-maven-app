@@ -75,6 +75,12 @@ So it's we need to add credentials(`docker-hub-repo`) on jenkins before doing a 
 
 Now we can use theses credentials in our pipeline and push docker image after the build 
 
+Here is everything you need to build and push your image to `ECR`
+
+
+![Image](/images/build-push-ecr.png)
+
+
 ```
 stage('build image') {
     steps {
@@ -95,53 +101,11 @@ stage('build image') {
 ```
 <br>
 
-## Deploy to AWS : EC2 and EKS 
+## Deploy EKS 
 
 ![Image](/images/step4.drawio.png)
 
 In this project we only have one image to deploy, but if we have more than one, it's will not be easy de deploy without using a container orchestrator. 
-
-## - Use docker compose to deploy to AWS EC2 instance
-
-For that ssh to the EC2 server : 
-
- - Install docker compose on the EC2 server
-```
-sudo curl -L "https://github.com/docker/compose/releases/download/2.11.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-```
-check the version : https://github.com/docker/compose/releases 
-
-- Next, set the permissions to make the file executable
-
-```
-sudo chmod +x /usr/local/bin/docker-compose
-```
-- Then, verify that the installation was successful by checking the version
-
-```
-docker-compose --version
-```
-- install [sshagent](https://www.jenkins.io/doc/pipeline/steps/ssh-agent/) plugin ang update the deploy step
-
-```
-    stage("deploy") {
-        steps {
-            script {
-                echo "Deploying application to the EC2 server..."
-                //def dockerCmd = "docker run -d -p 8080:8080 ${IMAGE_NAME}"
-                def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
-                def ec2InstanceServer = 'ec2-user@44.211.190.125'
-                sshagent(['ec2-server-key']){
-                    sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2InstanceServer}:/home/ec2-user"
-                    sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2InstanceServer}:/home/ec2-user"
-                    sh "ssh -o StrictHostKeyChecking=no ${ec2InstanceServer} ${shellCmd}"
-                }
-            }
-        }
-    }
-```
-
-## - Deploy to EKS
 
 ### [See how to create EKS cluster](https://github.com/hotiaDiallo/devops-java-maven-app/tree/eks-cluster-with-node-group)
 
@@ -150,11 +114,50 @@ Steps to deploy Image from Dockerhub to EKS
 - Install [kubectl](https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/) inside Jenkins container 
 - Install [aws-iam-authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html) inside Jenkins container. 
 Amazon EKS uses IAM to provide authentication to your Kubernetes cluster through the AWS IAM authenticator for Kubernetes
+Follow this [link](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to see more more details on how to configure `aws-iam-authenticator`
 - create a [kubeconfig](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) file for the cluster : The kubectl command-line tool uses configuration information in kubeconfig files to communicate with the API server of a cluster
 
 ```
 aws eks update-kubeconfig --region region-code --name my-cluster
 ```
+
+In this project, we are going to use `eksctl` which uses `CloudFormation` to create our cluster
+
+Follow this [Link](https://github.com/weaveworks/eksctl) to install `eksctl`
+
+
+```
+    eksctl create cluster \
+    > --name devops-java-maven-app \
+    > --region eu-west-3 \
+    > --nodegroup-name devops-java-maven \
+    > --node-type t2.micro \
+    > --nodes 2 \
+    > --nodes-min 1 \
+    > --nodes-max 3
+
+```
+
+![Image](/images/eks-devops-app.png)
+
+Create a Secret for Kubernetes to be able tu pull images from ECR 
+
+```
+    kubectl create secret docker-registry my-aws-registry-key \
+    > --docker-server=761900873497.dkr.ecr.eu-west-3.amazonaws.com \
+    > --docker-username=AWS \
+    > --docker-password=[PASSWORD]
+```
+
+[PASSWORD] --> `aws ecr get-login-password --region eu-west-3`
+
+Add aws credentials on Jenkins for authentication.
+
+![Image](/images/jenkins-credentials.png)
+
+Add Kubeconfig file on Jenkins: since we are using Jenkins as a docker container, we are going to create a `config` file in our server and then copy that config file to the jenkins user directory: `/var/jenkins_home/.kube/`
+
+![Image](/images/config-for-k8s.png)
 
 Then update the deploy step on Jenkinsfile
 
@@ -202,18 +205,3 @@ stage('commit version update') {
     }
 }
 ```
-    
-
----
-## Jenkins Shared Library 
-
-1- Create shared Library project 
-
-[Created Shared Library Project/Repository](https://github.com/hotiaDiallo/jenkins-shared-library)
-
-2- Used Shared Library in Jenkinsﬁle
-- Use Parameters in Shared Library
-- Extract logic into Groovy Classes
-- Deﬁne Shared Library in Jenkinsﬁle directly (project scoped)
-
-[jenkinsfile with shared library](https://github.com/hotiaDiallo/devops-java-maven-app/tree/jenkins-jobs/jenkins-shared-library)
