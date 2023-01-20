@@ -138,6 +138,8 @@ Follow this [Link](https://github.com/weaveworks/eksctl) to install `eksctl`
 
 ```
 
+If you want to use Terraform, [Check this project where I explain how to create an EKS cluster](https://github.com/hotiaDiallo/terraform-playground/tree/provision-eks)
+
 ![Image](/images/eks-devops-app.png)
 
 Create a Secret for Kubernetes to be able tu pull images from ECR 
